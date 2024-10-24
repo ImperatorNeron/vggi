@@ -1,4 +1,4 @@
-export default function CreateSurfaceData(uData, vData, scale) {
+function CreateSurfaceData(uData, vData, scale) {
     let uVertexList = [];
     let vVertexList = [];
 
