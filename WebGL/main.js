@@ -58,7 +58,7 @@ function draw() {
     /* Draw the six faces of a cube, with different colors. */
     gl.uniform4fv(shProgram.iColor, [1, 1, 0, 1]);
 
-    surface.Draw();
+    surface.bufferAndDraw();
 }
 
 
@@ -74,7 +74,7 @@ function initGL(uData, vData, scale = 0.1) {
     shProgram.iColor = gl.getUniformLocation(prog, "color");
 
     surface = new Model('Surface');
-    surface.BufferData(CreateSurfaceData(uData, vData, scale));
+    surface.createStripsAndIndices(CreateSurfaceData(uData, vData, scale));
 
     gl.enable(gl.DEPTH_TEST);
 }
