@@ -1,29 +1,94 @@
+function Vertex(point) {
+    this.point = point;
+    this.normal = [];
+    this.triangles = [];
+}
+
+function Triangle(vertex0, vertex1, vertex2) {
+    this.vertex0 = vertex0;
+    this.vertex1 = vertex1;
+    this.vertex2 = vertex2;
+    this.normal = [];
+    this.tangent = [];
+}
+
+
+function createPolylineList(data1, data2, scale) {
+    let vertexList = [];
+    let dn1 = (data1.max - data1.min) / (data1.n)
+    let dn2 = (data2.max - data2.min) / (data2.n)
+
+    for (let i = data1.min; i <= data1.max; i += dn1) {
+        let polylineVertexList = [];
+        for (let j = data2.min; j <= data2.max + dn2; j += dn2) {
+            let vertex = getVertex(i, j, scale);
+            polylineVertexList.push(vertex);
+        }
+        vertexList.push(polylineVertexList);
+    }
+
+    return vertexList;
+}
+
+function addTriangles(vertexList) {
+
+}
+
+function orderPolylineToStripVertexes(vertexList) {
+    let strips = []
+    for (let i = 0; i < vertexList.length - 1; i++) {
+        let strip = []
+        for (let j = 0; j < vertexList[i].length - 1; j++) {
+            strip.push(new Vertex(vertexList[i][j]))
+            strip.push(new Vertex(vertexList[i + 1][j]))
+        }
+        strips.push(strip)
+    }
+    return strips
+}
+
+function getJustVertexes(vertexList) {
+    let newVertexList = []
+    for (let i = 0; i < vertexList.length; i++) {
+        let tempList = []
+        for (let j of vertexList[i]) {
+            tempList.push(j.point)
+        }
+        newVertexList.push(tempList)
+    }
+
+    return newVertexList
+}
+
+function createIndices(stripList) {
+    let stripsIndicesList = []
+    for (let i = 0; i < stripList.length; i++) {
+        let stripIndicesList = []
+        for (let j = 0; j < Math.floor(stripList[i].length / 2) - 1; j++) {
+            stripIndicesList.push(j * 2, j * 2 + 1, j * 2 + 2);
+            stripIndicesList.push(j * 2 + 1, j * 2 + 2, j * 2 + 3);
+        }
+        stripsIndicesList.push(stripIndicesList)
+    }
+    return stripsIndicesList
+}
+
 function CreateSurfaceData(uData, vData, scale) {
-    let uVertexList = [];
-    let vVertexList = [];
+    let uVertexList = createPolylineList(uData, vData, scale);
+    let vVertexList = createPolylineList(vData, uData, scale);
 
-    let du = (uData.max - uData.min) / (uData.n)
-    let dv = (vData.max - vData.min) / (vData.n)
+    let uStripList = orderPolylineToStripVertexes(uVertexList);
+    let vStripList = orderPolylineToStripVertexes(vVertexList);
 
-    for (let u = uData.min; u <= uData.max; u += du) {
-        let uSinglePolylineVertexList = [];
-        for (let v = vData.min; v <= vData.max; v += dv) {
-            let vertex = getVertex(u, v, scale);
-            uSinglePolylineVertexList.push(vertex);
-        }
-        uVertexList.push(uSinglePolylineVertexList);
-    }
+    let uOrderedPoints = getJustVertexes(uStripList)
+    let vOrderedPoints = getJustVertexes(vStripList)
 
-    for (let v = vData.min; v <= vData.max; v += dv) {
-        let vSinglePolylineVertexList = [];
-        for (let u = uData.min; u <= uData.max; u += du) {
-            let vertex = getVertex(u, v, scale);
-            vSinglePolylineVertexList.push(vertex);
-        }
-        vVertexList.push(vSinglePolylineVertexList);
-    }
+    let stripLists = { uOrderedPoints, vOrderedPoints }
+    let uIndices = createIndices(uStripList);
+    let vIndices = createIndices(vStripList);
+    let indiceLists = { uIndices, vIndices }
 
-    return { uVertexList, vVertexList };
+    return { stripLists, indiceLists };
 }
 
 

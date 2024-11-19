@@ -5,10 +5,6 @@ let surface;                    // A surface model
 let shProgram;                  // A shader program
 let spaceball;                  // A SimpleRotator object that lets the user rotate the view by mouse.
 
-function deg2rad(angle) {
-    return angle * Math.PI / 180;
-}
-
 
 // Constructor
 function ShaderProgram(name, program) {
@@ -130,8 +126,8 @@ function init() {
         return;
     }
     try {
-        let uData = { max: 14.5, min: 0, n: 70 }
-        let vData = { max: 1.5 * Math.PI, min: 0, n: 70 }
+        let uData = { max: 14.2, min: 0, n: 100 }
+        let vData = { max: 1.5 * Math.PI, min: 0, n: 100 }
         initGL(uData, vData, 0.06);  // initialize the WebGL graphics context
     }
     catch (e) {

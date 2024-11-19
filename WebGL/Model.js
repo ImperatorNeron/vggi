@@ -1,34 +1,16 @@
 function Model(name) {
     this.name = name;
-    this.allStripsListV = [];
-    this.allStripsIndicesV = [];
-    this.allStripsListU = [];
-    this.allStripsIndicesU = [];
+    this.vStripList = [];
+    this.vStripIndicesList = [];
+    this.uStripList = [];
+    this.uStripIndicesList = [];
 
-    this.createStripsAndIndicesHelper = function (lines, strips, stripsIndices) {
-        for (let i = 0; i < lines.length - 1; i++) {
-            let strip = []
-            for (let j = 0; j < lines[i].length - 1; j++) {
-                strip.push(lines[i][j])
-                strip.push(lines[i + 1][j])
-            }
-            strips.push(strip)
-        }
 
-        for (let i = 0; i < strips.length; i++) {
-            let oneStripIndices = []
-            for (let j = 0; j < Math.floor(strips[i].length / 2) - 1; j++) {
-                oneStripIndices.push(j * 2, j * 2 + 1, j * 2 + 2);
-                oneStripIndices.push(j * 2 + 1, j * 2 + 2, j * 2 + 3);
-            }
-            stripsIndices.push(oneStripIndices)
-        }
-
-    }
-
-    this.createStripsAndIndices = function (vertexLists) {
-        this.createStripsAndIndicesHelper(vertexLists.vVertexList, this.allStripsListV, this.allStripsIndicesV)
-        // this.BufferDataHelper(vertexLists.uVertexList, this.allStripsListU, this.allStripsIndicesU)
+    this.createStripsAndIndices = function (data) {
+        this.vStripList = data.stripLists.vOrderedPoints
+        this.uStripList = data.stripLists.uOrderedPoints
+        this.vStripIndicesList = data.indiceLists.vIndices
+        this.uStripIndicesList = data.indiceLists.uIndices
     }
 
     this.bufferAndDrawHelper = function (strips, stripsIndices) {
@@ -51,7 +33,7 @@ function Model(name) {
     }
 
     this.bufferAndDraw = function () {
-        this.bufferAndDrawHelper(this.allStripsListV, this.allStripsIndicesV)
-        // this.DrawHelper(this.allStripsListU, this.allStripsIndicesU)
+        this.bufferAndDrawHelper(this.vStripList, this.vStripIndicesList)
+        this.bufferAndDrawHelper(this.uStripList, this.uStripIndicesList)
     }
 }
