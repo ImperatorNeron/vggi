@@ -1,39 +1,68 @@
+// Constructor
 function Model(name) {
     this.name = name;
-    this.vStripList = [];
-    this.vStripIndicesList = [];
-    this.uStripList = [];
-    this.uStripIndicesList = [];
+    this.modelData = null;
+    this.iVertexBufferU = gl.createBuffer();
+    this.iVertexBufferV = gl.createBuffer();
+    this.indecisesBufferU = gl.createBuffer();
+    this.indecisesBufferV = gl.createBuffer();
+    this.normalsBufferU = gl.createBuffer();
+    this.normalsBufferV = gl.createBuffer();
 
-
-    this.createStripsAndIndices = function (data) {
-        this.vStripList = data.stripLists.vOrderedPoints
-        this.uStripList = data.stripLists.uOrderedPoints
-        this.vStripIndicesList = data.indiceLists.vIndices
-        this.uStripIndicesList = data.indiceLists.uIndices
+    this.FlatPoints = function (vertexList) {
+        vertexList = vertexList.flat();
+        return vertexList.reduce((acc, vertex) => acc.concat(vertex.p), []);
     }
 
-    this.bufferAndDrawHelper = function (strips, stripsIndices) {
-        for (let i = 0; i < stripsIndices.length; i++) {
-
-            let flatStrip = strips[i].flat();
-            let buffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(flatStrip), gl.STREAM_DRAW);
-
-            gl.vertexAttribPointer(shProgram.iAttribVertex, 3, gl.FLOAT, false, 0, 0);
-            gl.enableVertexAttribArray(shProgram.iAttribVertex);
-
-            let indexBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(stripsIndices[i]), gl.STREAM_DRAW);
-
-            gl.drawElements(gl.TRIANGLES, stripsIndices[i].length, gl.UNSIGNED_SHORT, 0);
-        }
+    this.FlatNormals = function (vertexList) {
+        vertexList = vertexList.flat();
+        return vertexList.reduce((acc, vertex) => acc.concat(vertex.normal), []);
     }
 
-    this.bufferAndDraw = function () {
-        this.bufferAndDrawHelper(this.vStripList, this.vStripIndicesList)
-        this.bufferAndDrawHelper(this.uStripList, this.uStripIndicesList)
+    this.BufferDataHelper = function (vertexList, iVertexBuffer, indecises, indecisesBuffer, normalBuffer) {
+        // vertexes
+        flatVertices = this.FlatPoints(vertexList);
+        gl.bindBuffer(gl.ARRAY_BUFFER, iVertexBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(flatVertices), gl.STREAM_DRAW);
+
+        // Normals
+        let flatNormals = this.FlatNormals(vertexList);
+        gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(flatNormals), gl.STREAM_DRAW);
+
+        // Indecises
+        let flatIndecises = indecises.flat()
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indecisesBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(flatIndecises), gl.STREAM_DRAW);
+    }
+
+    this.BufferData = function (shapeData) {
+        this.modelData = shapeData
+        this.BufferDataHelper(shapeData.uVertexList, this.iVertexBufferU, shapeData.uIndecises, this.indecisesBufferU, this.normalsBufferU)
+        // this.BufferDataHelper(shapeData.vVertexList, this.iVertexBuffe ata.vIndecises, this.indecisesBufferV, this.normalsBufferV)
+    }
+
+    this.DrawHelper = function (iVertexBuffer, indecises, indecisesBuffer, normalBuffer) {
+        // vertexes
+        gl.bindBuffer(gl.ARRAY_BUFFER, iVertexBuffer);
+        gl.vertexAttribPointer(shProgram.iAttribVertex, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(shProgram.iAttribVertex);
+
+        // Normals
+        gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+        gl.vertexAttribPointer(shProgram.iAttribNormal, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(shProgram.iAttribNormal);
+
+        // Indecises
+        let flatIndecises = indecises.flat()
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indecisesBuffer);
+
+        // Draw by indecises
+        gl.drawElements(gl.TRIANGLES, flatIndecises.length, gl.UNSIGNED_SHORT, 0);
+    }
+
+    this.Draw = function () {
+        this.DrawHelper(this.iVertexBufferU, this.modelData.uIndecises, this.indecisesBufferU, this.normalsBufferU)
+        // this.DrawHelper(this.iVertexBufferV, this.modelData.vIndecises, this.indecisesBufferV, this.normalsBufferV)
     }
 }

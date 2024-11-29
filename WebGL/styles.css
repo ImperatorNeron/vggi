@@ -21,6 +21,9 @@ body {
 
 header {
     margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 h1 {
@@ -72,4 +75,71 @@ p {
     #canvas-holder {
         padding: 10px;
     }
+}
+
+#sliders {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; 
+    padding: 30px 30px 0 10px;
+    background: #1c1c1c;
+    border: 2px solid #333;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    min-width: 300px;
+    height: 100%;
+}
+
+#sliders div {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+label {
+    font-size: 1rem;
+    color: #ccc;
+    flex: 1;
+    text-align: right;
+    margin-right: 10px;
+}
+
+input[type="range"] {
+    width: 70%;
+    height: 8px;
+    background: #333;
+    border-radius: 5px;
+    outline: none;
+    cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #0d6efd;
+    cursor: pointer;
+    border: 2px solid #fff;
+    box-shadow: 0px 4px 8px rgba(13, 110, 253, 0.8);
+}
+
+input[type="range"]:hover {
+    background: #444;
+}
+
+#sliders span {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #0d6efd; 
+    min-width: 30px;
+    text-align: center;
+}
+
+.option{
+    justify-content: center;
+    color: #bad5ff;
+    font-size: 1.8rem;
+    font-weight: bold;
 }

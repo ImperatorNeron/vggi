@@ -4,7 +4,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PA#2</title>
+    <title>PA#1</title>
     <link rel="stylesheet" href="styles.css">
     <script src="./Utils/trackball-rotator.js"></script>
     <script src="./Utils/m4.js"></script>
@@ -12,18 +12,33 @@
     <script src="./models/Wellenkugel.js"></script>
     <script src="./Model.js"></script>
     <script src="./main.js"></script>
+    <script src="./models/DataStructures.js"></script>
 </head>
 
 <body onload="init()">
+    <header>
+        <h1>Surface of Revolution “Wellenkugel” (Variant 9)</h1>
+        <p id="message">Drag your mouse on the cube to rotate it.<br>
+            (On a touch screen, you can use your finger.)</p>
+    </header>
     <div class="container">
-        <header>
-            <h1>Surface of Revolution “Wellenkugel” (Variant 9)</h1>
-            <p id="message">Drag your mouse on the cube to rotate it.<br>
-                (On a touch screen, you can use your finger.)</p>
-        </header>
+        
 
         <section id="canvas-holder">
             <canvas width="1800" height="1800" id="webglcanvas" class="canvas"></canvas>
+            <section id="sliders">
+                <div class="option">Granularity</div>
+                <div>
+                    <label for="uSlider">U:</label>
+                    <input type="range" id="uSlider" min="20" max="100" value="80" step="1" />
+                    <span id="uValue">80</span>
+                </div>
+                <div>
+                    <label for="vSlider">V:</label>
+                    <input type="range" id="vSlider" min="20" max="100" value="80" step="1" />
+                    <span id="vValue">80</span>
+                </div>
+            </section>
         </section>
     </div>
 
