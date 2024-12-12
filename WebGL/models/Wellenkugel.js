@@ -9,7 +9,8 @@ function CreateSurfaceData(uData, vData, scale) {
     addTriangles(vVertexList, vIndecises);
     addNormals(uVertexList, du, dv);
     addNormals(vVertexList, du, dv);
-    return { uVertexList, vVertexList, uIndecises, vIndecises };
+    let texData = getCoordinatesAndTanList();
+    return { uVertexList, vVertexList, uIndecises, vIndecises, coordinates: texData.coordinatesList, tanList: texData.tanList };
 }
 
 function arraysHaveSameValues(arr1, arr2) {
@@ -123,4 +124,16 @@ function getVertex(u, v, scale) {
     let y = u * Math.cos(Math.cos(u)) * Math.sin(v)
     let z = u * Math.sin(Math.cos(u))
     return new Vertex([scale * x, scale * y, scale * z]);
+}
+
+function getCoordinatesAndTanList() {
+    let coordinatesList = []
+    let tanList = []
+    for (let u = 0; u < uData.n; u++) {
+        for (let v = 0; v < vData.n; v++) {
+            coordinatesList.push(u / uData.n, v / vData.n);
+            tanList.push(1, 0, 0);
+        }
+    }
+    return { coordinatesList, tanList }
 }

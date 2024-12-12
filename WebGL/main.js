@@ -10,8 +10,8 @@ let lightAngle = 0;
 let lightRadius = 10.0;
 
 // Global data for shape 
-let uData = { max: 15, min: 0, n: 80 }
-let vData = { max: 2 * Math.PI, min: 0, n: 80 }
+let uData = { max: 15, min: 0, n: 40 }
+let vData = { max: 2 * Math.PI, min: 0, n: 40 }
 let scale = 0.06
 
 function updateSliders() {
@@ -67,7 +67,7 @@ function draw() {
 
     let projection = m4.perspective(Math.PI / 8, 1, 8, 12);
     let modelView = spaceball.getViewMatrix();
-    let rotateToPointZero = m4.axisRotation([0.707, 0.707, 0], 0.7);
+    let rotateToPointZero = m4.axisRotation([0.707, 0.707, 0], 0.0);
     let translateToPointZero = m4.translation(0, 0, -10);
     let matAccum0 = m4.multiply(rotateToPointZero, modelView);
     let matAccum1 = m4.multiply(translateToPointZero, matAccum0);
@@ -80,14 +80,13 @@ function draw() {
     m4.inverse(normalMatrix, normalMatrix);
     m4.transpose(normalMatrix, normalMatrix);
 
-
+    gl.uniformMatrix4fv(shProgram.iModelViewProjectionMatrix, false, modelViewProjection);
     gl.uniformMatrix4fv(shProgram.iNormalMatrix, false, normalMatrix);
-    let viewerPosition = [0.0, 0.0, 10.0];
+    let viewerPosition = [0.0, 0.0, 1.0];
     gl.uniform3fv(shProgram.iViewerPos, viewerPosition);
 
     updateLightPosition();
-
-    gl.uniformMatrix4fv(shProgram.iModelViewProjectionMatrix, false, modelViewProjection);
+    gl.uniform3fv(shProgram.iLightSource, [0.0, 0.0, -10.0]);
     gl.uniform4fv(shProgram.iColor, [1, 1, 0, 1]);
 
     surface.Draw();
@@ -118,6 +117,11 @@ function initGL() {
     shProgram.iNormalMatrix = gl.getUniformLocation(prog, "normalMatrix");
     shProgram.iLightSource = gl.getUniformLocation(prog, "lightPos");
     shProgram.iViewerPos = gl.getUniformLocation(prog, "viewerPos");
+    shProgram.iCoordinates = gl.getAttribLocation(prog, "coordinates");
+    shProgram.iTan = gl.getAttribLocation(prog, "tan");
+    shProgram.iDiffuseTexture = gl.getUniformLocation(prog, "diffuseTexture");
+    shProgram.iSpecularTexture = gl.getUniformLocation(prog, "specularTexture");
+    shProgram.iNormalTexture = gl.getUniformLocation(prog, "normalTexture");
 
     surface = new Model('Surface');
     surface.BufferData(CreateSurfaceData(uData, vData, scale));
