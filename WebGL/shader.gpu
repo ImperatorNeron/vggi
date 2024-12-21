@@ -15,7 +15,7 @@ varying vec2 var_coordinates;
 
 void main() {
     var_normal = normalize((normalMatrix * vec4(normal, 0.0)).xyz);
-    var_tan = normalize((normalMatrix * vec4(tan, 0.0)).xyz);
+    var_tan = normalize((normalMatrix * vec4(tan, 0.0)).xyz);;
     var_position = (ModelViewProjectionMatrix * vec4(vertex, 1.0)).xyz;
     var_coordinates = coordinates;
     gl_Position = ModelViewProjectionMatrix * vec4(vertex, 1.0);

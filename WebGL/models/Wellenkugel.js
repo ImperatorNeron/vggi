@@ -9,8 +9,8 @@ function CreateSurfaceData(uData, vData, scale) {
     addTriangles(vVertexList, vIndecises);
     addNormals(uVertexList, du, dv);
     addNormals(vVertexList, du, dv);
-    let texData = getCoordinatesAndTanList();
-    return { uVertexList, vVertexList, uIndecises, vIndecises, coordinates: texData.coordinatesList, tanList: texData.tanList };
+    calculateTangents(uVertexList)
+    return { uVertexList, vVertexList, uIndecises, vIndecises };
 }
 
 function arraysHaveSameValues(arr1, arr2) {
@@ -21,9 +21,9 @@ function addNormals(vertexList) {
     let flatVertexList = vertexList.flat();
     for (let i = 0; i < flatVertexList.length; i++) {
         for (let j = 0; j < flatVertexList[i].triangles.length; j++) {
-            let p0 = flatVertexList[i].triangles[j].v0;
-            let p1 = flatVertexList[i].triangles[j].v1;
-            let p2 = flatVertexList[i].triangles[j].v2;
+            let p0 = flatVertexList[i].triangles[j].v0.p;
+            let p1 = flatVertexList[i].triangles[j].v1.p;
+            let p2 = flatVertexList[i].triangles[j].v2.p;
 
             let vector1 = null;
             let vector2 = null;
@@ -59,9 +59,9 @@ function addTriangles(vertexList, indecises) {
         let result = indecises.filter(subArray => subArray.includes(i));
         for (let j = 0; j < result.length; j++) {
             let t = new Triangle(
-                flatVertexList[result[j][0]].p,
-                flatVertexList[result[j][1]].p,
-                flatVertexList[result[j][2]].p,
+                flatVertexList[result[j][0]],
+                flatVertexList[result[j][1]],
+                flatVertexList[result[j][2]],
             )
             flatVertexList[i].triangles.push(t)
         }
@@ -113,7 +113,7 @@ function CalculateVertexes(data0, data1, scale, reversed = false) {
             }
             tempList.push(vertex);
         }
-        vertexList.push(tempList);
+        vertexList.push(tempList);3
     }
 
     return vertexList;
@@ -123,17 +123,65 @@ function getVertex(u, v, scale) {
     let x = u * Math.cos(Math.cos(u)) * Math.cos(v)
     let y = u * Math.cos(Math.cos(u)) * Math.sin(v)
     let z = u * Math.sin(Math.cos(u))
-    return new Vertex([scale * x, scale * y, scale * z]);
+    return new Vertex([scale * x, scale * y, scale * z], [u / uData.n, v / vData.n]);
 }
 
-function getCoordinatesAndTanList() {
-    let coordinatesList = []
-    let tanList = []
-    for (let u = 0; u < uData.n; u++) {
-        for (let v = 0; v < vData.n; v++) {
-            coordinatesList.push(u / uData.n, v / vData.n);
-            tanList.push(1, 0, 0);
+
+function calculateTangents(vertexList) {
+    let flatVertexList = vertexList.flat();
+
+    // Ініціалізація тангентів для кожної вершини
+    for (let i = 0; i < flatVertexList.length; i++) {
+        flatVertexList[i].tangent = [0, 0, 0];
+    }
+
+    // Обчислення тангентів для трикутників
+    for (let i = 0; i < flatVertexList.length; i++) {
+        for (let j = 0; j < flatVertexList[i].triangles.length; j++) {
+            let p0 = flatVertexList[i].triangles[j].v0.p;
+            let p1 = flatVertexList[i].triangles[j].v1.p;
+            let p2 = flatVertexList[i].triangles[j].v2.p;
+
+            let uv0 = flatVertexList[i].triangles[j].v0.uv;
+            let uv1 = flatVertexList[i].triangles[j].v1.uv;
+            let uv2 = flatVertexList[i].triangles[j].v2.uv;
+
+            let edge1 = m4.subtractVectors(p1, p0);
+            let edge2 = m4.subtractVectors(p2, p0);
+            let deltaUV1 = m4.subtractVectors(uv1, uv0);
+            let deltaUV2 = m4.subtractVectors(uv2, uv0);
+
+            let f = 1.0 / (deltaUV1[0] * deltaUV2[1] - deltaUV2[0] * deltaUV1[1]);
+
+            let tangent = [
+                f * (deltaUV2[1] * edge1[0] - deltaUV1[1] * edge2[0]),
+                f * (deltaUV2[1] * edge1[1] - deltaUV1[1] * edge2[1]),
+                f * (deltaUV2[1] * edge1[2] - deltaUV1[1] * edge2[2])
+            ];
+            // Додавання тангенту до кожної вершини трикутника
+            if (arraysHaveSameValues(p0, flatVertexList[i].p)) {
+                flatVertexList[i].triangles[j].tangent = tangent;
+            } else if (arraysHaveSameValues(p1, flatVertexList[i].p)) {
+                flatVertexList[i].triangles[j].tangent = tangent;
+            } else if (arraysHaveSameValues(p2, flatVertexList[i].p)) {
+                flatVertexList[i].triangles[j].tangent = tangent;
+            }
+        }
+
+        // Усереднення тангентів для кожної вершини
+        let tangent = [0, 0, 0];
+        let totalWeight = 0;
+
+        for (let j = 0; j < flatVertexList[i].triangles.length; j++) {
+            let triangle = flatVertexList[i].triangles[j];
+            let weight = triangle.weight || 1; // Можна додати вагу, якщо є
+
+            tangent = m4.addVectors(tangent, m4.scaleVector(triangle.tangent, weight));
+            totalWeight += weight;
+        }
+
+        if (totalWeight > 0) {
+            flatVertexList[i].tangent = Array.from(tangent.map(value => -value / totalWeight));
         }
     }
-    return { coordinatesList, tanList }
 }

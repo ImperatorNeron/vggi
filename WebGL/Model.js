@@ -24,9 +24,19 @@ function Model(name) {
         return vertexList.reduce((acc, vertex) => acc.concat(vertex.normal), []);
     }
 
-    this.BufferDataHelper = function (vertexList, iVertexBuffer, indecises, indecisesBuffer, normalBuffer, coordinates, tanList) {
+    this.FlatTangent = function (vertexList) {
+        vertexList = vertexList.flat();
+        return vertexList.reduce((acc, vertex) => acc.concat(vertex.tangent), []);
+    }
+
+    this.FlatCoordinates = function (vertexList) {
+        vertexList = vertexList.flat();
+        return vertexList.reduce((acc, vertex) => acc.concat(vertex.uv), []);
+    }
+
+    this.BufferDataHelper = function (vertexList, iVertexBuffer, indecises, indecisesBuffer, normalBuffer) {
         // vertexes
-        flatVertices = this.FlatPoints(vertexList);
+        let flatVertices = this.FlatPoints(vertexList);
         gl.bindBuffer(gl.ARRAY_BUFFER, iVertexBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(flatVertices), gl.STREAM_DRAW);
 
@@ -36,11 +46,13 @@ function Model(name) {
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(flatNormals), gl.STREAM_DRAW);
 
         // Tan + coordinates + textures
+        let flatCoordinates = this.FlatCoordinates(vertexList);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.coordinatesBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coordinates), gl.STREAM_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(flatCoordinates), gl.STREAM_DRAW);
 
+        let flatTangent = this.FlatTangent(vertexList)
         gl.bindBuffer(gl.ARRAY_BUFFER, this.tanBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tanList), gl.STREAM_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(flatTangent), gl.STREAM_DRAW);
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.diffuse);
@@ -69,7 +81,7 @@ function Model(name) {
 
     this.BufferData = function (shapeData) {
         this.modelData = shapeData
-        this.BufferDataHelper(shapeData.uVertexList, this.iVertexBufferU, shapeData.uIndecises, this.indecisesBufferU, this.normalsBufferU, shapeData.coordinates, shapeData.tanList)
+        this.BufferDataHelper(shapeData.uVertexList, this.iVertexBufferU, shapeData.uIndecises, this.indecisesBufferU, this.normalsBufferU)
         // this.BufferDataHelper(shapeData.vVertexList, this.iVertexBuffe ata.vIndecises, this.indecisesBufferV, this.normalsBufferV)
     }
 
