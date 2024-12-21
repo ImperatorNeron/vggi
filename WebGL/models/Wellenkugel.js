@@ -113,7 +113,7 @@ function CalculateVertexes(data0, data1, scale, reversed = false) {
             }
             tempList.push(vertex);
         }
-        vertexList.push(tempList);3
+        vertexList.push(tempList); 3
     }
 
     return vertexList;
@@ -123,7 +123,7 @@ function getVertex(u, v, scale) {
     let x = u * Math.cos(Math.cos(u)) * Math.cos(v)
     let y = u * Math.cos(Math.cos(u)) * Math.sin(v)
     let z = u * Math.sin(Math.cos(u))
-    return new Vertex([scale * x, scale * y, scale * z], [u / uData.n, v / vData.n]);
+    return new Vertex([scale * x, scale * y, scale * z], [(u - uData.min) / (uData.max - uData.min), (v - vData.min) / (vData.max - vData.min)]);
 }
 
 
