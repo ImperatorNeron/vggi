@@ -11,20 +11,64 @@ let lightRadius = 10.0;
 
 // Global data for shape 
 let uData = { max: 15, min: 0, n: 40 }
-let vData = { max: 2 * Math.PI, min: 0, n: 40 }
+let vData = { max: 2 * Math.PI, min: 0, n: 20 }
 let scale = 0.06
+
+let texScale = 1
+let uOffset = 0.1
+let vOffset = 0.1
+
 
 function updateSliders() {
     const uSlider = document.getElementById("uSlider");
     const vSlider = document.getElementById("vSlider");
+    const scaleSlider = document.getElementById("scaleSlider");
+    const uOffsetSlider = document.getElementById("uOffsetSlider");
+    const vOffsetSlider = document.getElementById("vOffsetSlider");
+
     const uValue = document.getElementById("uValue");
     const vValue = document.getElementById("vValue");
+    const scaleValue = document.getElementById("scaleValue");
+    const uOffsetValue = document.getElementById("uOffsetValue");
+    const vOffsetValue = document.getElementById("vOffsetValue");
+
 
     uValue.textContent = uSlider.value;
     vValue.textContent = vSlider.value;
 
+    scaleValue.textContent = scaleSlider.value;
+    uOffsetValue.textContent = uOffsetSlider.value;
+    vOffsetValue.textContent = vOffsetSlider.value;
+
     uData.n = parseInt(uSlider.value, 10);
     vData.n = parseInt(vSlider.value, 10);
+
+    texScale = parseFloat(scaleSlider.value);
+    uOffset = parseFloat(uOffsetSlider.value);
+    vOffset = parseFloat(vOffsetSlider.value);
+
+    surface.BufferData(CreateSurfaceData(uData, vData, 0.06));
+    draw();
+}
+
+function handleKeyPress(event) {
+    console.log("Key pressed:", event.key);
+    const uOffsetValue = document.getElementById("uOffsetValue");
+    const vOffsetValue = document.getElementById("vOffsetValue");
+
+
+    if (event.key === 'w') {
+        uOffset += 0.01
+    } else if (event.key === 's') {
+        uOffset -= 0.01
+    } else if (event.key === 'a') {
+        vOffset -= 0.01
+    } else if (event.key === 'd') {
+        vOffset += 0.01;
+    }
+
+    uOffsetValue.textContent = uOffset.toPrecision(2);
+    vOffsetValue.textContent = vOffset.toPrecision(2);
 
     surface.BufferData(CreateSurfaceData(uData, vData, 0.06));
     draw();
@@ -41,8 +85,8 @@ function updateLightPosition() {
 }
 
 function animate() {
-    draw();
-    requestAnimationFrame(animate);
+    // draw();
+    // requestAnimationFrame(animate);
 }
 
 function ShaderProgram(name, program) {
@@ -85,7 +129,6 @@ function draw() {
     let viewerPosition = [0.0, 0.0, 1.0];
     gl.uniform3fv(shProgram.iViewerPos, viewerPosition);
 
-    updateLightPosition();
     gl.uniform3fv(shProgram.iLightSource, [0.0, 0.0, -10.0]);
     gl.uniform4fv(shProgram.iColor, [1, 1, 0, 1]);
 
@@ -182,8 +225,10 @@ function init() {
 
     document.getElementById("uSlider").addEventListener("input", updateSliders);
     document.getElementById("vSlider").addEventListener("input", updateSliders);
-
+    document.getElementById("uOffsetSlider").addEventListener("input", updateSliders);
+    document.getElementById("vOffsetSlider").addEventListener("input", updateSliders);
+    document.getElementById("scaleSlider").addEventListener("input", updateSliders);
+    document.addEventListener('keydown', handleKeyPress);
     draw();
-    // Call for lighting animation
     animate();
 }

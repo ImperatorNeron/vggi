@@ -113,7 +113,7 @@ function CalculateVertexes(data0, data1, scale, reversed = false) {
             }
             tempList.push(vertex);
         }
-        vertexList.push(tempList); 3
+        vertexList.push(tempList); 
     }
 
     return vertexList;
@@ -123,19 +123,24 @@ function getVertex(u, v, scale) {
     let x = u * Math.cos(Math.cos(u)) * Math.cos(v)
     let y = u * Math.cos(Math.cos(u)) * Math.sin(v)
     let z = u * Math.sin(Math.cos(u))
-    return new Vertex([scale * x, scale * y, scale * z], [(u - uData.min) / (uData.max - uData.min), (v - vData.min) / (vData.max - vData.min)]);
+    
+    let tU = ((u - uData.min) / (uData.max - uData.min) - uOffset);
+    let tV = ((v - vData.min) / (vData.max - vData.min) - vOffset);
+
+    tU = ((uOffset + (tU * texScale)) % 1 + 1) % 1;
+    tV = ((vOffset + (tV * texScale)) % 1 + 1) % 1;
+
+    return new Vertex([scale * x, scale * y, scale * z], [tU, tV]);
 }
 
 
 function calculateTangents(vertexList) {
     let flatVertexList = vertexList.flat();
 
-    // Ініціалізація тангентів для кожної вершини
     for (let i = 0; i < flatVertexList.length; i++) {
         flatVertexList[i].tangent = [0, 0, 0];
     }
 
-    // Обчислення тангентів для трикутників
     for (let i = 0; i < flatVertexList.length; i++) {
         for (let j = 0; j < flatVertexList[i].triangles.length; j++) {
             let p0 = flatVertexList[i].triangles[j].v0.p;
@@ -158,7 +163,6 @@ function calculateTangents(vertexList) {
                 f * (deltaUV2[1] * edge1[1] - deltaUV1[1] * edge2[1]),
                 f * (deltaUV2[1] * edge1[2] - deltaUV1[1] * edge2[2])
             ];
-            // Додавання тангенту до кожної вершини трикутника
             if (arraysHaveSameValues(p0, flatVertexList[i].p)) {
                 flatVertexList[i].triangles[j].tangent = tangent;
             } else if (arraysHaveSameValues(p1, flatVertexList[i].p)) {
@@ -168,13 +172,12 @@ function calculateTangents(vertexList) {
             }
         }
 
-        // Усереднення тангентів для кожної вершини
         let tangent = [0, 0, 0];
         let totalWeight = 0;
 
         for (let j = 0; j < flatVertexList[i].triangles.length; j++) {
             let triangle = flatVertexList[i].triangles[j];
-            let weight = triangle.weight || 1; // Можна додати вагу, якщо є
+            let weight = triangle.weight || 1;
 
             tangent = m4.addVectors(tangent, m4.scaleVector(triangle.tangent, weight));
             totalWeight += weight;

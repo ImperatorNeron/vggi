@@ -86,7 +86,7 @@ p {
     border: 2px solid #333;
     border-radius: 10px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    min-width: 300px;
+    min-width: 350px;
     height: 100%;
 }
 
@@ -105,7 +105,7 @@ label {
 }
 
 input[type="range"] {
-    width: 70%;
+    width: 60%;
     height: 8px;
     background: #333;
     border-radius: 5px;
@@ -135,6 +135,7 @@ input[type="range"]:hover {
     color: #0d6efd; 
     min-width: 30px;
     text-align: center;
+    margin-left: 5px;
 }
 
 .option{
