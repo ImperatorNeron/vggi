@@ -120,15 +120,13 @@ function CalculateVertexes(data0, data1, scale, reversed = false) {
 }
 
 function getVertex(u, v, scale) {
+    console.log("here")
     let x = u * Math.cos(Math.cos(u)) * Math.cos(v)
     let y = u * Math.cos(Math.cos(u)) * Math.sin(v)
     let z = u * Math.sin(Math.cos(u))
     
-    let tU = ((u - uData.min) / (uData.max - uData.min) - uOffset);
-    let tV = ((v - vData.min) / (vData.max - vData.min) - vOffset);
-
-    tU = ((uOffset + (tU * texScale)) % 1 + 1) % 1;
-    tV = ((vOffset + (tV * texScale)) % 1 + 1) % 1;
+    let tU = ((u - uData.min) / (uData.max - uData.min));
+    let tV = ((v - vData.min) / (vData.max - vData.min));
 
     return new Vertex([scale * x, scale * y, scale * z], [tU, tV]);
 }

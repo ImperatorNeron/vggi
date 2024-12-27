@@ -12,12 +12,16 @@ varying vec3 var_position;
 varying vec3 var_normal;
 varying vec3 var_tan;
 varying vec2 var_coordinates;
+uniform float uOffset;
+uniform float vOffset;
+uniform float texScale;
 
 void main() {
     var_normal = normalize((normalMatrix * vec4(normal, 0.0)).xyz);
     var_tan = normalize((normalMatrix * vec4(tan, 0.0)).xyz);;
     var_position = (ModelViewProjectionMatrix * vec4(vertex, 1.0)).xyz;
-    var_coordinates = coordinates;
+    vec2 scaledTexCoord = coordinates * texScale;
+    var_coordinates = mod(scaledTexCoord + vec2(uOffset, vOffset), 1.0);
     gl_Position = ModelViewProjectionMatrix * vec4(vertex, 1.0);
 }
 `;

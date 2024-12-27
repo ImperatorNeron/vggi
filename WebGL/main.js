@@ -10,51 +10,60 @@ let lightAngle = 0;
 let lightRadius = 10.0;
 
 // Global data for shape 
-let uData = { max: 15, min: 0, n: 40 }
-let vData = { max: 2 * Math.PI, min: 0, n: 20 }
+let uData = { max: 15, min: 0, n: 50 }
+let vData = { max: 2 * Math.PI, min: 0, n: 50 }
 let scale = 0.06
 
 let texScale = 1
-let uOffset = 0.1
-let vOffset = 0.1
+let uOffset = 0.5
+let vOffset = 0.5
+
+function updateUV() {
+    const uSlider = document.getElementById("uSlider");
+    const vSlider = document.getElementById("vSlider");
+
+    const uValue = document.getElementById("uValue");
+    const vValue = document.getElementById("vValue");
+
+    uValue.textContent = uSlider.value;
+    vValue.textContent = vSlider.value;
+
+    uData.n = parseInt(uSlider.value, 10);
+    vData.n = parseInt(vSlider.value, 10);
+
+    surface.BufferData(CreateSurfaceData(uData, vData, 0.06));
+    draw();
+}
 
 
 function updateSliders() {
-    const uSlider = document.getElementById("uSlider");
-    const vSlider = document.getElementById("vSlider");
     const scaleSlider = document.getElementById("scaleSlider");
     const uOffsetSlider = document.getElementById("uOffsetSlider");
     const vOffsetSlider = document.getElementById("vOffsetSlider");
 
-    const uValue = document.getElementById("uValue");
-    const vValue = document.getElementById("vValue");
     const scaleValue = document.getElementById("scaleValue");
     const uOffsetValue = document.getElementById("uOffsetValue");
     const vOffsetValue = document.getElementById("vOffsetValue");
-
-
-    uValue.textContent = uSlider.value;
-    vValue.textContent = vSlider.value;
 
     scaleValue.textContent = scaleSlider.value;
     uOffsetValue.textContent = uOffsetSlider.value;
     vOffsetValue.textContent = vOffsetSlider.value;
 
-    uData.n = parseInt(uSlider.value, 10);
-    vData.n = parseInt(vSlider.value, 10);
-
     texScale = parseFloat(scaleSlider.value);
     uOffset = parseFloat(uOffsetSlider.value);
     vOffset = parseFloat(vOffsetSlider.value);
 
-    surface.BufferData(CreateSurfaceData(uData, vData, 0.06));
-    draw();
+    gl.uniform1f(shProgram.iUOffset, uOffset);
+    gl.uniform1f(shProgram.iVOffset, vOffset);
+    gl.uniform1f(shProgram.iTexScale, texScale);
 }
 
 function handleKeyPress(event) {
     console.log("Key pressed:", event.key);
     const uOffsetValue = document.getElementById("uOffsetValue");
     const vOffsetValue = document.getElementById("vOffsetValue");
+    const uOffsetSlider = document.getElementById("uOffsetSlider");
+    const vOffsetSlider = document.getElementById("vOffsetSlider");
 
 
     if (event.key === 'w') {
@@ -67,11 +76,17 @@ function handleKeyPress(event) {
         vOffset += 0.01;
     }
 
+    uOffset = Math.min(Math.max(uOffset, 0), 1);
+    vOffset = Math.min(Math.max(vOffset, 0), 1);
+
     uOffsetValue.textContent = uOffset.toPrecision(2);
     vOffsetValue.textContent = vOffset.toPrecision(2);
+    uOffsetSlider.value = uOffset.toPrecision(2);
+    vOffsetSlider.value = vOffset.toPrecision(2);
 
-    surface.BufferData(CreateSurfaceData(uData, vData, 0.06));
-    draw();
+    gl.uniform1f(shProgram.iUOffset, uOffset);
+    gl.uniform1f(shProgram.iVOffset, vOffset);
+    gl.uniform1f(shProgram.iTexScale, texScale);
 }
 
 function updateLightPosition() {
@@ -85,8 +100,8 @@ function updateLightPosition() {
 }
 
 function animate() {
-    // draw();
-    // requestAnimationFrame(animate);
+    draw();
+    requestAnimationFrame(animate);
 }
 
 function ShaderProgram(name, program) {
@@ -132,6 +147,11 @@ function draw() {
     gl.uniform3fv(shProgram.iLightSource, [0.0, 0.0, -10.0]);
     gl.uniform4fv(shProgram.iColor, [1, 1, 0, 1]);
 
+    gl.uniform1f(shProgram.iTexScale, texScale);
+    gl.uniform1f(shProgram.iUOffset, uOffset);
+    gl.uniform1f(shProgram.iVOffset, vOffset);
+
+
     surface.Draw();
 }
 
@@ -165,6 +185,9 @@ function initGL() {
     shProgram.iDiffuseTexture = gl.getUniformLocation(prog, "diffuseTexture");
     shProgram.iSpecularTexture = gl.getUniformLocation(prog, "specularTexture");
     shProgram.iNormalTexture = gl.getUniformLocation(prog, "normalTexture");
+    shProgram.iTexScale = gl.getUniformLocation(prog, "texScale");
+    shProgram.iUOffset = gl.getUniformLocation(prog, "uOffset");
+    shProgram.iVOffset = gl.getUniformLocation(prog, "vOffset");
 
     surface = new Model('Surface');
     surface.BufferData(CreateSurfaceData(uData, vData, scale));
@@ -223,8 +246,8 @@ function init() {
 
     spaceball = new TrackballRotator(canvas, draw, 0);
 
-    document.getElementById("uSlider").addEventListener("input", updateSliders);
-    document.getElementById("vSlider").addEventListener("input", updateSliders);
+    document.getElementById("uSlider").addEventListener("input", updateUV);
+    document.getElementById("vSlider").addEventListener("input", updateUV);
     document.getElementById("uOffsetSlider").addEventListener("input", updateSliders);
     document.getElementById("vOffsetSlider").addEventListener("input", updateSliders);
     document.getElementById("scaleSlider").addEventListener("input", updateSliders);
